@@ -1,0 +1,38 @@
+[
+  {
+    "id": "service_1",
+    "name": "Hair Cut",
+    "description": "Professional hair cutting service",
+    "price": 500,
+    "duration": 30,
+    "category": "Hair Care",
+    "isActive": true,
+    "createdAt": "2023-01-01T00:00:00Z",
+    "updatedAt": "2023-01-01T00:00:00Z",
+    "createdBy": "admin"
+  },
+  {
+    "id": "service_2",
+    "name": "Facial",
+    "description": "Deep cleansing facial treatment",
+    "price": 800,
+    "duration": 45,
+    "category": "Skin Care",
+    "isActive": true,
+    "createdAt": "2023-01-02T00:00:00Z",
+    "updatedAt": "2023-01-02T00:00:00Z",
+    "createdBy": "admin"
+  },
+  {
+    "id": "service_3",
+    "name": "Manicure",
+    "description": "Nail care and manicure service",
+    "price": 400,
+    "duration": 30,
+    "category": "Nail Care",
+    "isActive": true,
+    "createdAt": "2023-01-03T00:00:00Z",
+    "updatedAt": "2023-01-03T00:00:00Z",
+    "createdBy": "admin"
+  }
+]

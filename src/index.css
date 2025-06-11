@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import responsive utilities */
+@import './styles/responsive.css';
+
+/* CSS Custom Properties for Dynamic Theming */
+:root {
+  /* Default Light Theme Colors */
+  --color-primary: #8B5CF6;
+  --color-secondary: #A78BFA;
+  --color-background: #F9FAFB;
+  --color-surface: #FFFFFF;
+  --color-text: #111827;
+  --color-textSecondary: #6B7280;
+  --color-accent: #10B981;
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --color-border: #E5E7EB;
+}
+
+/* Dark theme overrides */
+.dark {
+  --color-primary: #8B5CF6;
+  --color-secondary: #A78BFA;
+  --color-background: #111827;
+  --color-surface: #1F2937;
+  --color-text: #F9FAFB;
+  --color-textSecondary: #D1D5DB;
+  --color-accent: #10B981;
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --color-border: #374151;
+}
+
+@layer base {
+  html {
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    /* Better font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Support for safe areas on mobile devices */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  
+  /* Ensure all containers respect viewport width */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Responsive images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Better touch targets for mobile */
+  button, 
+  [role="button"], 
+  input[type="submit"], 
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@layer components {
+  /* Responsive container */
+  .container-responsive {
+    @apply w-full max-w-full px-3 sm:px-4 lg:px-6 mx-auto;
+  }
+  
+  /* Responsive text */
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-base sm:text-lg lg:text-xl xl:text-2xl;
+  }
+  
+  /* Responsive spacing */
+  .spacing-responsive {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+  
+  .spacing-responsive-sm {
+    @apply p-2 sm:p-3 lg:p-4;
+  }
+  
+  /* Mobile-first button */
+  .btn-responsive {
+    @apply w-full sm:w-auto px-4 py-2 text-sm sm:text-base rounded-md transition-colors duration-200;
+  }
+  
+  /* Responsive grid */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6;
+  }
+  
+  /* Hide scrollbars but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  /* Touch-friendly utilities */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Prevent text selection on UI elements */
+  .select-none-ui {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Responsive visibility */
+  .mobile-only {
+    @apply block sm:hidden;
+  }
+  
+  .desktop-only {
+    @apply hidden sm:block;
+  }
+  
+  .tablet-up {
+    @apply hidden md:block;
+  }
+  
+  .mobile-tablet {
+    @apply block lg:hidden;
+  }
+  
+  /* Dynamic Theme Utilities */
+  .bg-theme-primary { background-color: var(--color-primary); }
+  .bg-theme-secondary { background-color: var(--color-secondary); }
+  .bg-theme-background { background-color: var(--color-background); }
+  .bg-theme-surface { background-color: var(--color-surface); }
+  .bg-theme-accent { background-color: var(--color-accent); }
+  .bg-theme-success { background-color: var(--color-success); }
+  .bg-theme-warning { background-color: var(--color-warning); }
+  .bg-theme-error { background-color: var(--color-error); }
+  
+  .text-theme-primary { color: var(--color-primary); }
+  .text-theme-secondary { color: var(--color-secondary); }
+  .text-theme-text { color: var(--color-text); }
+  .text-theme-textSecondary { color: var(--color-textSecondary); }
+  .text-theme-accent { color: var(--color-accent); }
+  .text-theme-success { color: var(--color-success); }
+  .text-theme-warning { color: var(--color-warning); }
+  .text-theme-error { color: var(--color-error); }
+  
+  .border-theme-primary { border-color: var(--color-primary); }
+  .border-theme-secondary { border-color: var(--color-secondary); }
+  .border-theme-border { border-color: var(--color-border); }
+  .border-theme-accent { border-color: var(--color-accent); }
+  .border-theme-success { border-color: var(--color-success); }
+  .border-theme-warning { border-color: var(--color-warning); }
+  .border-theme-error { border-color: var(--color-error); }
+  
+  .ring-theme-primary { --tw-ring-color: var(--color-primary); }
+  .ring-theme-secondary { --tw-ring-color: var(--color-secondary); }
+  .ring-theme-accent { --tw-ring-color: var(--color-accent); }
+  .ring-theme-success { --tw-ring-color: var(--color-success); }
+  .ring-theme-warning { --tw-ring-color: var(--color-warning); }
+  .ring-theme-error { --tw-ring-color: var(--color-error); }
+}

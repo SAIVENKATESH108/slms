@@ -1,0 +1,89 @@
+{
+    "Hair Oils & Head Massage": {
+        "COCONUT OIL": 350,
+        "OLIVE OIL": 400,
+        "ALMOND OIL": 400,
+        "AMARAVATI OIL": 400,
+        "MIX OIL": 400,
+        "Head Massage": 400
+    },
+    "Waxing Services": {
+        "UNDERARMS": {
+            "B. WAX": 100,
+            "RICA": 150,
+            "CHO": 180
+        },
+        "HANDS": {
+            "B. WAX": 250,
+            "RICA": 350,
+            "CHO": 500
+        },
+        "HALF LEGS": {
+            "B. WAX": 300,
+            "RICA": 450,
+            "CHO": 600
+        },
+        "FULL LEGS": {
+            "B. WAX": 600,
+            "RICA": 900,
+            "CHO": 1200
+        },
+        "FULL BODY": {
+            "B. WAX": 2200,
+            "RICA": 2500,
+            "CHO": 4000,
+            "HONEY": 1800
+        }
+    },
+    "Hair Cuts": {
+        "BABY CUT": 350,
+        "U CUT": 400,
+        "STEP CUT": 600,
+        "LAYER": 600,
+        "MUTILAYER": 900
+    },
+    "Face Packs & Bleach": {
+        "FACE PACK": 200,
+        "NECK": 250,
+        "HANDS": 300,
+        "LEGS": 200,
+        "BLEACH": 500,
+        "TAN PACK": 700
+    },
+    "Manicure & Pedicure": {
+        "PEDICURE": {
+            "NORMAL": 700,
+            "SPL": 800
+        },
+        "MENICURE": {
+            "NORMAL": 350,
+            "SPL": 450
+        }
+    },
+    "Henna Services": {
+        "BLACK HENNA": 300,
+        "NATURAL HENNA": 400,
+        "INDIAN": "Design-based",
+        "ARABIC": "Design-based"
+    },
+    "Facial Treatments": {
+        "MIX FRUIT": 700,
+        "PAPAYA": 900,
+        "ORANGE": 900,
+        "ALOVALA": 900,
+        "BANANA": 900,
+        "NATURAL FRUIT": 950,
+        "D.TAN": 1500,
+        "ANTI TAN": 1500,
+        "WINE": 1200,
+        "PURE WINE": 1500,
+        "INSTANT GLOW": 1500,
+        "PEARL": 1700,
+        "GOLD": 2500,
+        "SILVER": 2800,
+        "DIAMOND": 3000,
+        "SKIN WHITING": 3500,
+        "O3+ POWER": 4200,
+        "O3+WHITING": 4800
+    }
+}

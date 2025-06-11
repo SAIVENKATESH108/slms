@@ -1,0 +1,273 @@
+/* Responsive Utilities for All Device Types */
+
+/* Base responsive text sizing */
+.responsive-text-xs {
+  @apply text-xs;
+  @apply iphone-se:text-xs galaxy-s8:text-xs;
+  @apply iphone-xr:text-xs iphone-12-pro:text-xs iphone-14-pro-max:text-sm;
+  @apply pixel-7:text-xs galaxy-s20:text-xs galaxy-a51:text-xs;
+  @apply galaxy-fold:text-xs surface-duo:text-xs;
+  @apply sm:text-xs md:text-sm lg:text-sm xl:text-sm;
+}
+
+.responsive-text-sm {
+  @apply text-sm;
+  @apply iphone-se:text-xs galaxy-s8:text-xs;
+  @apply iphone-xr:text-sm iphone-12-pro:text-sm iphone-14-pro-max:text-sm;
+  @apply pixel-7:text-sm galaxy-s20:text-sm galaxy-a51:text-sm;
+  @apply galaxy-fold:text-xs surface-duo:text-sm;
+  @apply sm:text-sm md:text-sm lg:text-base xl:text-base;
+}
+
+.responsive-text-base {
+  @apply text-sm;
+  @apply iphone-se:text-sm galaxy-s8:text-sm;
+  @apply iphone-xr:text-base iphone-12-pro:text-base iphone-14-pro-max:text-base;
+  @apply pixel-7:text-base galaxy-s20:text-base galaxy-a51:text-base;
+  @apply galaxy-fold:text-sm surface-duo:text-base;
+  @apply sm:text-base md:text-base lg:text-lg xl:text-lg;
+}
+
+.responsive-text-lg {
+  @apply text-base;
+  @apply iphone-se:text-sm galaxy-s8:text-sm;
+  @apply iphone-xr:text-lg iphone-12-pro:text-lg iphone-14-pro-max:text-lg;
+  @apply pixel-7:text-lg galaxy-s20:text-lg galaxy-a51:text-lg;
+  @apply galaxy-fold:text-base surface-duo:text-lg;
+  @apply sm:text-lg md:text-lg lg:text-xl xl:text-xl;
+}
+
+.responsive-text-xl {
+  @apply text-lg;
+  @apply iphone-se:text-base galaxy-s8:text-base;
+  @apply iphone-xr:text-xl iphone-12-pro:text-xl iphone-14-pro-max:text-xl;
+  @apply pixel-7:text-xl galaxy-s20:text-xl galaxy-a51:text-xl;
+  @apply galaxy-fold:text-lg surface-duo:text-xl;
+  @apply sm:text-xl md:text-xl lg:text-2xl xl:text-2xl;
+}
+
+.responsive-text-2xl {
+  @apply text-xl;
+  @apply iphone-se:text-lg galaxy-s8:text-lg;
+  @apply iphone-xr:text-2xl iphone-12-pro:text-2xl iphone-14-pro-max:text-2xl;
+  @apply pixel-7:text-2xl galaxy-s20:text-2xl galaxy-a51:text-2xl;
+  @apply galaxy-fold:text-xl surface-duo:text-2xl;
+  @apply sm:text-2xl md:text-2xl lg:text-3xl xl:text-3xl;
+}
+
+/* Responsive spacing utilities */
+.responsive-p-sm {
+  @apply p-2;
+  @apply iphone-se:p-1 galaxy-s8:p-1;
+  @apply iphone-xr:p-2 iphone-12-pro:p-2 iphone-14-pro-max:p-3;
+  @apply pixel-7:p-2 galaxy-s20:p-2 galaxy-a51:p-2;
+  @apply galaxy-fold:p-1 surface-duo:p-2;
+  @apply sm:p-3 md:p-4 lg:p-4 xl:p-5;
+}
+
+.responsive-p-md {
+  @apply p-3;
+  @apply iphone-se:p-2 galaxy-s8:p-2;
+  @apply iphone-xr:p-3 iphone-12-pro:p-3 iphone-14-pro-max:p-4;
+  @apply pixel-7:p-3 galaxy-s20:p-3 galaxy-a51:p-3;
+  @apply galaxy-fold:p-2 surface-duo:p-3;
+  @apply sm:p-4 md:p-5 lg:p-6 xl:p-6;
+}
+
+.responsive-p-lg {
+  @apply p-4;
+  @apply iphone-se:p-3 galaxy-s8:p-3;
+  @apply iphone-xr:p-4 iphone-12-pro:p-4 iphone-14-pro-max:p-5;
+  @apply pixel-7:p-4 galaxy-s20:p-4 galaxy-a51:p-4;
+  @apply galaxy-fold:p-3 surface-duo:p-4;
+  @apply sm:p-5 md:p-6 lg:p-8 xl:p-8;
+}
+
+/* Responsive margin utilities */
+.responsive-m-sm {
+  @apply m-2;
+  @apply iphone-se:m-1 galaxy-s8:m-1;
+  @apply iphone-xr:m-2 iphone-12-pro:m-2 iphone-14-pro-max:m-3;
+  @apply pixel-7:m-2 galaxy-s20:m-2 galaxy-a51:m-2;
+  @apply galaxy-fold:m-1 surface-duo:m-2;
+  @apply sm:m-3 md:m-4 lg:m-4 xl:m-5;
+}
+
+.responsive-m-md {
+  @apply m-3;
+  @apply iphone-se:m-2 galaxy-s8:m-2;
+  @apply iphone-xr:m-3 iphone-12-pro:m-3 iphone-14-pro-max:m-4;
+  @apply pixel-7:m-3 galaxy-s20:m-3 galaxy-a51:m-3;
+  @apply galaxy-fold:m-2 surface-duo:m-3;
+  @apply sm:m-4 md:m-5 lg:m-6 xl:m-6;
+}
+
+/* Responsive grid utilities */
+.responsive-grid-cols {
+  @apply grid-cols-1;
+  @apply iphone-se:grid-cols-1 galaxy-s8:grid-cols-1;
+  @apply iphone-xr:grid-cols-1 iphone-12-pro:grid-cols-1 iphone-14-pro-max:grid-cols-2;
+  @apply pixel-7:grid-cols-1 galaxy-s20:grid-cols-1 galaxy-a51:grid-cols-1;
+  @apply galaxy-fold:grid-cols-1 surface-duo:grid-cols-2;
+  @apply sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  @apply ipad-mini:grid-cols-2 ipad-air:grid-cols-3 ipad-pro:grid-cols-3;
+  @apply surface-pro:grid-cols-3 zenbook-fold:grid-cols-3;
+  @apply nest-hub:grid-cols-4 nest-hub-max:grid-cols-4;
+}
+
+.responsive-grid-cols-cards {
+  @apply grid-cols-1;
+  @apply iphone-se:grid-cols-1 galaxy-s8:grid-cols-1;
+  @apply iphone-xr:grid-cols-2 iphone-12-pro:grid-cols-2 iphone-14-pro-max:grid-cols-2;
+  @apply pixel-7:grid-cols-2 galaxy-s20:grid-cols-2 galaxy-a51:grid-cols-2;
+  @apply galaxy-fold:grid-cols-1 surface-duo:grid-cols-2;
+  @apply sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4;
+  @apply ipad-mini:grid-cols-3 ipad-air:grid-cols-4 ipad-pro:grid-cols-4;
+  @apply surface-pro:grid-cols-3 zenbook-fold:grid-cols-4;
+  @apply nest-hub:grid-cols-5 nest-hub-max:grid-cols-6;
+}
+
+/* Responsive gap utilities */
+.responsive-gap {
+  @apply gap-2;
+  @apply iphone-se:gap-1 galaxy-s8:gap-1;
+  @apply iphone-xr:gap-2 iphone-12-pro:gap-2 iphone-14-pro-max:gap-3;
+  @apply pixel-7:gap-2 galaxy-s20:gap-2 galaxy-a51:gap-2;
+  @apply galaxy-fold:gap-1 surface-duo:gap-2;
+  @apply sm:gap-3 md:gap-4 lg:gap-4 xl:gap-6;
+}
+
+/* Responsive button sizing */
+.responsive-btn {
+  @apply px-3 py-2 text-sm;
+  @apply iphone-se:px-2 iphone-se:py-1 iphone-se:text-xs;
+  @apply galaxy-s8:px-2 galaxy-s8:py-1 galaxy-s8:text-xs;
+  @apply iphone-xr:px-3 iphone-xr:py-2 iphone-xr:text-sm;
+  @apply iphone-12-pro:px-3 iphone-12-pro:py-2 iphone-12-pro:text-sm;
+  @apply iphone-14-pro-max:px-4 iphone-14-pro-max:py-2 iphone-14-pro-max:text-sm;
+  @apply pixel-7:px-3 pixel-7:py-2 pixel-7:text-sm;
+  @apply galaxy-s20:px-3 galaxy-s20:py-2 galaxy-s20:text-sm;
+  @apply galaxy-a51:px-3 galaxy-a51:py-2 galaxy-a51:text-sm;
+  @apply galaxy-fold:px-2 galaxy-fold:py-1 galaxy-fold:text-xs;
+  @apply surface-duo:px-3 surface-duo:py-2 surface-duo:text-sm;
+  @apply sm:px-4 sm:py-2 sm:text-sm;
+  @apply md:px-4 md:py-2 md:text-base;
+  @apply lg:px-6 lg:py-3 lg:text-base;
+  @apply xl:px-6 xl:py-3 xl:text-base;
+}
+
+/* Responsive card sizing */
+.responsive-card {
+  @apply p-3 rounded-lg;
+  @apply iphone-se:p-2 iphone-se:rounded-md;
+  @apply galaxy-s8:p-2 galaxy-s8:rounded-md;
+  @apply iphone-xr:p-3 iphone-xr:rounded-lg;
+  @apply iphone-12-pro:p-3 iphone-12-pro:rounded-lg;
+  @apply iphone-14-pro-max:p-4 iphone-14-pro-max:rounded-lg;
+  @apply pixel-7:p-3 pixel-7:rounded-lg;
+  @apply galaxy-s20:p-3 galaxy-s20:rounded-lg;
+  @apply galaxy-a51:p-3 galaxy-a51:rounded-lg;
+  @apply galaxy-fold:p-2 galaxy-fold:rounded-md;
+  @apply surface-duo:p-3 surface-duo:rounded-lg;
+  @apply sm:p-4 sm:rounded-lg;
+  @apply md:p-5 md:rounded-xl;
+  @apply lg:p-6 lg:rounded-xl;
+  @apply xl:p-6 xl:rounded-xl;
+}
+
+/* Responsive icon sizing */
+.responsive-icon-sm {
+  @apply w-4 h-4;
+  @apply iphone-se:w-3 iphone-se:h-3 galaxy-s8:w-3 galaxy-s8:h-3;
+  @apply iphone-xr:w-4 iphone-xr:h-4 iphone-12-pro:w-4 iphone-12-pro:h-4;
+  @apply iphone-14-pro-max:w-5 iphone-14-pro-max:h-5;
+  @apply pixel-7:w-4 pixel-7:h-4 galaxy-s20:w-4 galaxy-s20:h-4 galaxy-a51:w-4 galaxy-a51:h-4;
+  @apply galaxy-fold:w-3 galaxy-fold:h-3 surface-duo:w-4 surface-duo:h-4;
+  @apply sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-5 xl:h-5;
+}
+
+.responsive-icon-md {
+  @apply w-5 h-5;
+  @apply iphone-se:w-4 iphone-se:h-4 galaxy-s8:w-4 galaxy-s8:h-4;
+  @apply iphone-xr:w-5 iphone-xr:h-5 iphone-12-pro:w-5 iphone-12-pro:h-5;
+  @apply iphone-14-pro-max:w-6 iphone-14-pro-max:h-6;
+  @apply pixel-7:w-5 pixel-7:h-5 galaxy-s20:w-5 galaxy-s20:h-5 galaxy-a51:w-5 galaxy-a51:h-5;
+  @apply galaxy-fold:w-4 galaxy-fold:h-4 surface-duo:w-5 surface-duo:h-5;
+  @apply sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-6 lg:h-6 xl:w-6 xl:h-6;
+}
+
+.responsive-icon-lg {
+  @apply w-6 h-6;
+  @apply iphone-se:w-5 iphone-se:h-5 galaxy-s8:w-5 galaxy-s8:h-5;
+  @apply iphone-xr:w-6 iphone-xr:h-6 iphone-12-pro:w-6 iphone-12-pro:h-6;
+  @apply iphone-14-pro-max:w-7 iphone-14-pro-max:h-7;
+  @apply pixel-7:w-6 pixel-7:h-6 galaxy-s20:w-6 galaxy-s20:h-6 galaxy-a51:w-6 galaxy-a51:h-6;
+  @apply galaxy-fold:w-5 galaxy-fold:h-5 surface-duo:w-6 surface-duo:h-6;
+  @apply sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-8 xl:h-8;
+}
+
+/* Safe area utilities for devices with notches/rounded corners */
+.safe-area-padding {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-pt {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-pl {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-pr {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Responsive container for different screen orientations */
+.responsive-container {
+  @apply w-full mx-auto;
+  @apply iphone-se:max-w-full galaxy-s8:max-w-full;
+  @apply iphone-xr:max-w-full iphone-12-pro:max-w-full iphone-14-pro-max:max-w-full;
+  @apply pixel-7:max-w-full galaxy-s20:max-w-full galaxy-a51:max-w-full;
+  @apply galaxy-fold:max-w-full surface-duo:max-w-full;
+  @apply sm:max-w-full md:max-w-4xl lg:max-w-6xl xl:max-w-7xl;
+  @apply ipad-mini:max-w-4xl ipad-air:max-w-5xl ipad-pro:max-w-6xl;
+  @apply surface-pro:max-w-5xl zenbook-fold:max-w-6xl;
+  @apply nest-hub:max-w-6xl nest-hub-max:max-w-7xl;
+}
+
+/* Responsive table utilities */
+.responsive-table {
+  @apply text-xs;
+  @apply iphone-se:text-xs galaxy-s8:text-xs;
+  @apply iphone-xr:text-sm iphone-12-pro:text-sm iphone-14-pro-max:text-sm;
+  @apply pixel-7:text-sm galaxy-s20:text-sm galaxy-a51:text-sm;
+  @apply galaxy-fold:text-xs surface-duo:text-sm;
+  @apply sm:text-sm md:text-base lg:text-base xl:text-base;
+}
+
+/* Responsive form elements */
+.responsive-input {
+  @apply px-2 py-1 text-sm;
+  @apply iphone-se:px-2 iphone-se:py-1 iphone-se:text-xs;
+  @apply galaxy-s8:px-2 galaxy-s8:py-1 galaxy-s8:text-xs;
+  @apply iphone-xr:px-3 iphone-xr:py-2 iphone-xr:text-sm;
+  @apply iphone-12-pro:px-3 iphone-12-pro:py-2 iphone-12-pro:text-sm;
+  @apply iphone-14-pro-max:px-3 iphone-14-pro-max:py-2 iphone-14-pro-max:text-sm;
+  @apply pixel-7:px-3 pixel-7:py-2 pixel-7:text-sm;
+  @apply galaxy-s20:px-3 galaxy-s20:py-2 galaxy-s20:text-sm;
+  @apply galaxy-a51:px-3 galaxy-a51:py-2 galaxy-a51:text-sm;
+  @apply galaxy-fold:px-2 galaxy-fold:py-1 galaxy-fold:text-xs;
+  @apply surface-duo:px-3 surface-duo:py-2 surface-duo:text-sm;
+  @apply sm:px-3 sm:py-2 sm:text-sm;
+  @apply md:px-4 md:py-2 md:text-base;
+  @apply lg:px-4 lg:py-3 lg:text-base;
+  @apply xl:px-4 xl:py-3 xl:text-base;
+}
