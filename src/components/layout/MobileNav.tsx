@@ -5,7 +5,8 @@ import {
   DollarSign, 
   BarChart2, 
   Building2,
-  Menu
+  Menu,
+  Calendar
 } from 'lucide-react';
 import { useState } from 'react';
 import { useUserStore } from '../../stores/userStore';
@@ -26,6 +27,7 @@ const MobileNav = () => {
   const mainNavItems = [
     { path: '/dashboard', icon: Home, label: 'Home' },
     { path: '/clients', icon: Users, label: 'Clients' },
+    { path: '/appointment', icon: Calendar, label: 'Book' },
     { path: '/finances', icon: DollarSign, label: 'Finances' },
     { path: '/flats', icon: Building2, label: 'Flats' },
   ];

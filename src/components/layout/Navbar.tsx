@@ -11,7 +11,8 @@ import {
   DollarSign,
   BarChart3,
   Settings as SettingsIcon,
-  UserCog
+  UserCog,
+  Calendar
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase/config';
@@ -43,6 +44,7 @@ export const Sidebar: React.FC = () => {
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home, roles: ['admin', 'manager', 'employee'] },
     { path: '/clients', label: 'Clients', icon: Users, roles: ['admin', 'manager', 'employee'] },
+    { path: '/appointment', label: 'Book Appointment', icon: Calendar, roles: ['admin', 'manager', 'employee'] },
     { path: '/flats', label: 'Flats', icon: Building, roles: ['admin', 'manager', 'employee'] },
     { path: '/finances', label: 'Finances', icon: DollarSign, roles: ['admin', 'manager', 'employee'] },
     { path: '/reports', label: 'Reports', icon: BarChart3, roles: ['admin', 'manager'] },
@@ -149,6 +151,7 @@ const Navbar: React.FC = () => {
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home, roles: ['admin', 'manager', 'employee'] },
     { path: '/clients', label: 'Clients', icon: Users, roles: ['admin', 'manager', 'employee'] },
+    { path: '/appointment', label: 'Book Appointment', icon: Calendar, roles: ['admin', 'manager', 'employee'] },
     { path: '/flats', label: 'Flats', icon: Building, roles: ['admin', 'manager', 'employee'] },
     { path: '/finances', label: 'Finances', icon: DollarSign, roles: ['admin', 'manager', 'employee'] },
     { path: '/reports', label: 'Reports', icon: BarChart3, roles: ['admin', 'manager'] },

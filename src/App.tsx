@@ -6,6 +6,7 @@ import { auth } from './firebase/config';
 import Layout from './components/layout/Layout';
 import Loader from './components/ui/Loader';
 import AuthGuard from './pages/auth/AuthGuard';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -13,6 +14,7 @@ import Clients from './pages/Clients';
 import FlatView from './pages/FlatView';
 import ClientDetail from './pages/ClientDetail';
 import ClientManagement from './pages/ClientManagement';
+import ClientAppointment from './pages/ClientAppointment';
 import Finances from './pages/Finances';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -26,7 +28,6 @@ import Register from './pages/auth/Register';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import ManagerDashboard from './components/dashboard/ManagerDashboard';
 import EmployeeDashboard from './components/dashboard/EmployeeDashboard';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Auth Context
 import { useAuthStore } from './stores/authStore';
@@ -124,6 +125,10 @@ function App() {
         {
           path: 'client-management',
           element: <AuthGuard requireAuth={true}><ClientManagement /></AuthGuard>,
+        },
+        {
+          path: 'appointment',
+          element: <AuthGuard requireAuth={true}><ClientAppointment /></AuthGuard>,
         },
         {
           path: 'flats',
