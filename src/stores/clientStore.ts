@@ -1,241 +1,3 @@
-// import { create } from 'zustand';
-// import { 
-//   collection, 
-//   query, 
-//   where, 
-//   getDocs, 
-//   doc, 
-//   addDoc, 
-//   updateDoc, 
-//   deleteDoc, 
-//   orderBy 
-// } from 'firebase/firestore';
-// import { firestore } from '../firebase/config';
-// import { useAuthStore } from './authStore';
-
-// export interface Client {
-//   id: string;
-//   name: string;
-//   phone: string;
-//   flatNumber: string;
-//   trustScore: number;
-//   notes: string;
-//   tags: string[];
-//   createdAt: Date;
-// }
-
-// interface Transaction {
-//   id: string;
-//   clientId: string;
-//   service: string;
-//   amount: number;
-//   isPaid: boolean;
-//   paymentDate?: Date;
-//   dueDate: Date;
-//   createdAt: Date;
-// }
-
-
-// interface ClientState {
-//   clients: Client[];
-//   transactions: Transaction[];
-//   loading: boolean;
-//   error: string | null;
-  
-//   fetchClients: () => Promise<void>;
-//   fetchClientsByFlat: (flatNumber: string) => Promise<Client[]>;
-//   fetchClientTransactions: (clientId: string) => Promise<Transaction[]>;
-//   addClient: (client: Omit<Client, 'id' | 'createdAt'>) => Promise<string>;
-//   updateClient: (id: string, data: Partial<Client>) => Promise<void>;
-//   deleteClient: (id: string) => Promise<void>;
-//   addTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt'>) => Promise<string>;
-//   updateTransaction: (id: string, data: Partial<Transaction>) => Promise<void>;
-// }
-
-// export const useClientStore = create<ClientState>((set, get) => ({
-//   clients: [],
-//   transactions: [],
-//   loading: false,
-//   error: null,
-  
-//   fetchClients: async () => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) return;
-    
-//     set({ loading: true, error: null });
-//     try {
-//       const clientsRef = collection(firestore, `users/${user.uid}/clients`);
-//       const q = query(clientsRef, orderBy('createdAt', 'desc'));
-//       const snapshot = await getDocs(q);
-      
-//       const clients = snapshot.docs.map(doc => ({
-//         id: doc.id,
-//         ...doc.data(),
-//         createdAt: doc.data().createdAt?.toDate() || new Date()
-//       })) as Client[];
-      
-//       set({ clients, loading: false });
-//     } catch (error) {
-//       set({ error: (error as Error).message, loading: false });
-//     }
-//   },
-  
-//   fetchClientsByFlat: async (flatNumber) => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) return [];
-    
-//     try {
-//       const clientsRef = collection(firestore, `users/${user.uid}/clients`);
-//       const q = query(clientsRef, where('flatNumber', '==', flatNumber));
-//       const snapshot = await getDocs(q);
-      
-//       return snapshot.docs.map(doc => ({
-//         id: doc.id,
-//         ...doc.data(),
-//         createdAt: doc.data().createdAt?.toDate() || new Date()
-//       })) as Client[];
-//     } catch (error) {
-//       set({ error: (error as Error).message });
-//       return [];
-//     }
-//   },
-  
-//   fetchClientTransactions: async (clientId) => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) return [];
-    
-//     try {
-//       const transactionsRef = collection(firestore, `users/${user.uid}/transactions`);
-//       const q = query(transactionsRef, where('clientId', '==', clientId), orderBy('createdAt', 'desc'));
-//       const snapshot = await getDocs(q);
-      
-//       return snapshot.docs.map(doc => ({
-//         id: doc.id,
-//         ...doc.data(),
-//         dueDate: doc.data().dueDate?.toDate() || new Date(),
-//         paymentDate: doc.data().paymentDate?.toDate(),
-//         createdAt: doc.data().createdAt?.toDate() || new Date()
-//       })) as Transaction[];
-//     } catch (error) {
-//       set({ error: (error as Error).message });
-//       return [];
-//     }
-//   },
-  
-//   addClient: async (client) => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) throw new Error('User not authenticated');
-    
-//     try {
-//       const clientsRef = collection(firestore, `users/${user.uid}/clients`);
-//       const newClient = {
-//         ...client,
-//         trustScore: 100, // Default trust score for new clients
-//         createdAt: new Date()
-//       };
-      
-//       const docRef = await addDoc(clientsRef, newClient);
-      
-//       // Update local state
-//       const { clients } = get();
-//       set({ 
-//         clients: [{ id: docRef.id, ...newClient } as Client, ...clients] 
-//       });
-      
-//       return docRef.id;
-//     } catch (error) {
-//       set({ error: (error as Error).message });
-//       throw error;
-//     }
-//   },
-  
-//   updateClient: async (id, data) => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) throw new Error('User not authenticated');
-    
-//     try {
-//       const clientRef = doc(firestore, `users/${user.uid}/clients/${id}`);
-//       await updateDoc(clientRef, data);
-      
-//       // Update local state
-//       const { clients } = get();
-//       set({
-//         clients: clients.map(client => 
-//           client.id === id ? { ...client, ...data } : client
-//         )
-//       });
-//     } catch (error) {
-//       set({ error: (error as Error).message });
-//       throw error;
-//     }
-//   },
-  
-//   deleteClient: async (id) => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) throw new Error('User not authenticated');
-    
-//     try {
-//       const clientRef = doc(firestore, `users/${user.uid}/clients/${id}`);
-//       await deleteDoc(clientRef);
-      
-//       // Update local state
-//       const { clients } = get();
-//       set({
-//         clients: clients.filter(client => client.id !== id)
-//       });
-//     } catch (error) {
-//       set({ error: (error as Error).message });
-//       throw error;
-//     }
-//   },
-  
-//   addTransaction: async (transaction) => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) throw new Error('User not authenticated');
-    
-//     try {
-//       const transactionsRef = collection(firestore, `users/${user.uid}/transactions`);
-//       const newTransaction = {
-//         ...transaction,
-//         createdAt: new Date()
-//       };
-      
-//       const docRef = await addDoc(transactionsRef, newTransaction);
-      
-//       // Update local state
-//       const { transactions } = get();
-//       set({ 
-//         transactions: [{ id: docRef.id, ...newTransaction } as Transaction, ...transactions] 
-//       });
-      
-//       return docRef.id;
-//     } catch (error) {
-//       set({ error: (error as Error).message });
-//       throw error;
-//     }
-//   },
-  
-//   updateTransaction: async (id, data) => {
-//     const user = useAuthStore.getState().user;
-//     if (!user) throw new Error('User not authenticated');
-    
-//     try {
-//       const transactionRef = doc(firestore, `users/${user.uid}/transactions/${id}`);
-//       await updateDoc(transactionRef, data);
-      
-//       // Update local state
-//       const { transactions } = get();
-//       set({
-//         transactions: transactions.map(transaction => 
-//           transaction.id === id ? { ...transaction, ...data } : transaction
-//         )
-//       });
-//     } catch (error) {
-//       set({ error: (error as Error).message });
-//       throw error;
-//     }
-//   }
-// }));
 import { create } from 'zustand';
 import { 
   collection, 
@@ -283,7 +45,7 @@ interface ClientState {
   updateTransaction: (id: string, data: Partial<LegacyTransaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   getAllTransactions: () => Promise<LegacyTransaction[]>;
-  migrateDateFields: () => Promise<void>; // New migration function
+  migrateDateFields: () => Promise<void>; // Migration function
 }
 
 // Helper function to safely convert Firestore data to Date
@@ -321,33 +83,65 @@ export const useClientStore = create<ClientState>((set, get) => ({
         return role === 'admin' || role === 'manager';
       };
 
-      let clientsRef;
-      let q;
+      // Get user-specific clients
+      const userClientsCol = collection(firestore, `users/${user.uid}/clients`);
+      const userQuery = query(userClientsCol, orderBy('createdAt', 'desc'));
+      const userSnapshot = await getDocs(userQuery);
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Access shared clients collection
-        clientsRef = collection(firestore, 'clients');
-        q = query(clientsRef, orderBy('createdAt', 'desc'));
-      } else {
-        // Employee: Access only their own clients
-        clientsRef = collection(firestore, `users/${user.uid}/clients`);
-        q = query(clientsRef, orderBy('createdAt', 'desc'));
-      }
-      
-      const snapshot = await getDocs(q);
-      
-      const clients = snapshot.docs.map(doc => {
+      let clients = userSnapshot.docs.map(doc => {
         const data = doc.data();
-        // Return only limited fields for public access (if needed, here we assume no public access)
         return {
           id: doc.id,
           name: data.name,
-          flatNumber: data.flatNumber,
-          apartment: data.apartment,
+          email: data.email || '',
           phone: data.phone,
-          createdAt: safeToDate(data.createdAt)
+          apartment: data.apartment || '',
+          flatNumber: data.flatNumber,
+          trustScore: data.trustScore || 100,
+          notes: data.notes || '',
+          tags: data.tags || [],
+          status: data.status || 'active',
+          preferredContactMethod: data.preferredContactMethod || 'phone',
+          createdAt: safeToDate(data.createdAt),
+          updatedAt: safeToDate(data.updatedAt || data.createdAt)
         };
       }) as Client[];
+      
+      // If admin or manager, also get shared clients
+      if (canAccessSharedData()) {
+        const sharedClientsCol = collection(firestore, 'clients');
+        const sharedQuery = query(sharedClientsCol, orderBy('createdAt', 'desc'));
+        const sharedSnapshot = await getDocs(sharedQuery);
+        
+        const sharedClients = sharedSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name,
+            email: data.email || '',
+            phone: data.phone,
+            apartment: data.apartment || '',
+            flatNumber: data.flatNumber,
+            trustScore: data.trustScore || 100,
+            notes: data.notes || '',
+            tags: data.tags || [],
+            status: data.status || 'active',
+            preferredContactMethod: data.preferredContactMethod || 'phone',
+            createdAt: safeToDate(data.createdAt),
+            updatedAt: safeToDate(data.updatedAt || data.createdAt),
+            isShared: true
+          };
+        }) as Client[];
+        
+        // Merge clients, avoiding duplicates
+        const clientIds = new Set(clients.map(c => c.id));
+        for (const client of sharedClients) {
+          if (!clientIds.has(client.id)) {
+            clients.push(client);
+            clientIds.add(client.id);
+          }
+        }
+      }
       
       set({ clients, loading: false });
     } catch (error) {
@@ -367,26 +161,41 @@ export const useClientStore = create<ClientState>((set, get) => ({
         return role === 'admin' || role === 'manager';
       };
 
-      let clientsRef;
-      let q;
+      // Get user-specific clients for this flat
+      const userClientsCol = collection(firestore, `users/${user.uid}/clients`);
+      const userQuery = query(userClientsCol, where('flatNumber', '==', flatNumber));
+      const userSnapshot = await getDocs(userQuery);
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Access shared clients collection
-        clientsRef = collection(firestore, 'clients');
-        q = query(clientsRef, where('flatNumber', '==', flatNumber));
-      } else {
-        // Employee: Access only their own clients
-        clientsRef = collection(firestore, `users/${user.uid}/clients`);
-        q = query(clientsRef, where('flatNumber', '==', flatNumber));
-      }
-      
-      const snapshot = await getDocs(q);
-      
-      return snapshot.docs.map(doc => ({
+      let clients = userSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: safeToDate(doc.data().createdAt)
       })) as Client[];
+      
+      // If admin or manager, also get shared clients for this flat
+      if (canAccessSharedData()) {
+        const sharedClientsCol = collection(firestore, 'clients');
+        const sharedQuery = query(sharedClientsCol, where('flatNumber', '==', flatNumber));
+        const sharedSnapshot = await getDocs(sharedQuery);
+        
+        const sharedClients = sharedSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: safeToDate(doc.data().createdAt),
+          isShared: true
+        })) as Client[];
+        
+        // Merge clients, avoiding duplicates
+        const clientIds = new Set(clients.map(c => c.id));
+        for (const client of sharedClients) {
+          if (!clientIds.has(client.id)) {
+            clients.push(client);
+            clientIds.add(client.id);
+          }
+        }
+      }
+      
+      return clients;
     } catch (error) {
       set({ error: (error as Error).message });
       return [];
@@ -407,25 +216,12 @@ export const useClientStore = create<ClientState>((set, get) => ({
         return role === 'admin' || role === 'manager';
       };
 
-      let transactionsRef;
-      let q;
-      const hasSharedAccess = canAccessSharedData();
+      // Get user-specific transactions for this client
+      const userTransactionsCol = collection(firestore, `users/${user.uid}/transactions`);
+      const userQuery = query(userTransactionsCol, where('clientId', '==', clientId));
+      const userSnapshot = await getDocs(userQuery);
       
-      if (hasSharedAccess) {
-        // Admin and Manager: Access shared transactions collection
-        transactionsRef = collection(firestore, 'transactions');
-        q = query(transactionsRef, where('clientId', '==', clientId));
-      } else {
-        // Employee: Access only their own transactions
-        transactionsRef = collection(firestore, `users/${user.uid}/transactions`);
-        q = query(transactionsRef, where('clientId', '==', clientId));
-      }
-      
-      const snapshot = await getDocs(q);
-      
-
-      
-      const transactions = snapshot.docs.map(doc => {
+      let transactions = userSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -434,9 +230,37 @@ export const useClientStore = create<ClientState>((set, get) => ({
           paymentDate: data.paymentDate ? safeToDate(data.paymentDate) : undefined,
           createdAt: safeToDate(data.createdAt)
         };
-      }) as Transaction[];
+      }) as LegacyTransaction[];
       
-      // Sort in memory instead of in the query
+      // If admin or manager, also get shared transactions for this client
+      if (canAccessSharedData()) {
+        const sharedTransactionsCol = collection(firestore, 'transactions');
+        const sharedQuery = query(sharedTransactionsCol, where('clientId', '==', clientId));
+        const sharedSnapshot = await getDocs(sharedQuery);
+        
+        const sharedTransactions = sharedSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            dueDate: safeToDate(data.dueDate),
+            paymentDate: data.paymentDate ? safeToDate(data.paymentDate) : undefined,
+            createdAt: safeToDate(data.createdAt),
+            isShared: true
+          };
+        }) as LegacyTransaction[];
+        
+        // Merge transactions, avoiding duplicates
+        const transactionIds = new Set(transactions.map(t => t.id));
+        for (const transaction of sharedTransactions) {
+          if (!transactionIds.has(transaction.id)) {
+            transactions.push(transaction);
+            transactionIds.add(transaction.id);
+          }
+        }
+      }
+      
+      // Sort in memory
       transactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       
       // Update local state with fetched transactions
@@ -454,36 +278,33 @@ export const useClientStore = create<ClientState>((set, get) => ({
     if (!user) throw new Error('User not authenticated');
     
     try {
-      // Helper function to check if user can access shared data
-      const canAccessSharedData = () => {
+      // Helper function to check if user is admin
+      const isAdmin = async () => {
         const currentUser = authService.getCurrentUser();
-        const role = currentUser?.customClaims?.role;
-        return role === 'admin' || role === 'manager';
+        return currentUser?.customClaims?.role === 'admin';
       };
 
-      let clientsRef;
-      let newClient;
+      const newClient = {
+        ...client,
+        trustScore: client.trustScore || 100,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
+      };
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Save to shared clients collection
-        clientsRef = collection(firestore, 'clients');
-        newClient = {
-          ...client,
-          trustScore: client.trustScore || 100,
-          createdAt: Timestamp.now(),
+      let docRef;
+      
+      // If admin, add to shared collection
+      if (await isAdmin()) {
+        const clientsCol = collection(firestore, 'clients');
+        docRef = await addDoc(clientsCol, {
+          ...newClient,
           createdBy: user.uid
-        };
+        });
       } else {
-        // Employee: Save to their own clients subcollection
-        clientsRef = collection(firestore, `users/${user.uid}/clients`);
-        newClient = {
-          ...client,
-          trustScore: client.trustScore || 100,
-          createdAt: Timestamp.now()
-        };
+        // Otherwise add to user's subcollection
+        const clientsCol = collection(firestore, `users/${user.uid}/clients`);
+        docRef = await addDoc(clientsCol, newClient);
       }
-      
-      const docRef = await addDoc(clientsRef, newClient);
       
       // Update local state
       const { clients } = get();
@@ -493,7 +314,7 @@ export const useClientStore = create<ClientState>((set, get) => ({
           ...client,
           trustScore: client.trustScore || 100,
           createdAt: new Date(),
-          createdBy: canAccessSharedData() ? user.uid : undefined
+          updatedAt: new Date()
         } as Client, ...clients] 
       });
       
@@ -509,41 +330,39 @@ export const useClientStore = create<ClientState>((set, get) => ({
     if (!user) throw new Error('User not authenticated');
     
     try {
-      // Helper function to check if user can access shared data
-      const canAccessSharedData = () => {
+      // Helper function to check if user is admin
+      const isAdmin = async () => {
         const currentUser = authService.getCurrentUser();
-        const role = currentUser?.customClaims?.role;
-        return role === 'admin' || role === 'manager';
+        return currentUser?.customClaims?.role === 'admin';
       };
 
-      let clientRef;
-      let updateData;
+      const updateData = {
+        ...data,
+        updatedAt: Timestamp.now()
+      };
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Update in shared clients collection
-        clientRef = doc(firestore, 'clients', id);
-        updateData = { 
-          ...data,
-          updatedBy: user.uid,
-          updatedAt: Timestamp.now()
-        };
+      // Check if client exists in shared collection
+      const sharedClientRef = doc(firestore, 'clients', id);
+      const sharedClientDoc = await getDoc(sharedClientRef);
+      
+      if (sharedClientDoc.exists()) {
+        // Only admins can update shared clients
+        if (await isAdmin()) {
+          await updateDoc(sharedClientRef, updateData);
+        } else {
+          throw new Error('Only admins can update shared clients');
+        }
       } else {
-        // Employee: Update in their own clients subcollection
-        clientRef = doc(firestore, `users/${user.uid}/clients`, id);
-        updateData = { ...data };
+        // Update in user's subcollection
+        const clientRef = doc(firestore, `users/${user.uid}/clients`, id);
+        await updateDoc(clientRef, updateData);
       }
-      
-      if (updateData.createdAt instanceof Date) {
-        updateData.createdAt = Timestamp.fromDate(updateData.createdAt);
-      }
-      
-      await updateDoc(clientRef, updateData);
       
       // Update local state
       const { clients } = get();
       set({
         clients: clients.map(client => 
-          client.id === id ? { ...client, ...data } : client
+          client.id === id ? { ...client, ...data, updatedAt: new Date() } : client
         )
       });
     } catch (error) {
@@ -557,24 +376,28 @@ export const useClientStore = create<ClientState>((set, get) => ({
     if (!user) throw new Error('User not authenticated');
     
     try {
-      // Helper function to check if user can access shared data
-      const canAccessSharedData = () => {
+      // Helper function to check if user is admin
+      const isAdmin = async () => {
         const currentUser = authService.getCurrentUser();
-        const role = currentUser?.customClaims?.role;
-        return role === 'admin' || role === 'manager';
+        return currentUser?.customClaims?.role === 'admin';
       };
 
-      let clientRef;
+      // Check if client exists in shared collection
+      const sharedClientRef = doc(firestore, 'clients', id);
+      const sharedClientDoc = await getDoc(sharedClientRef);
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Delete from shared clients collection
-        clientRef = doc(firestore, 'clients', id);
+      if (sharedClientDoc.exists()) {
+        // Only admins can delete shared clients
+        if (await isAdmin()) {
+          await deleteDoc(sharedClientRef);
+        } else {
+          throw new Error('Only admins can delete shared clients');
+        }
       } else {
-        // Employee: Delete from their own clients subcollection
-        clientRef = doc(firestore, `users/${user.uid}/clients`, id);
+        // Delete from user's subcollection
+        const clientRef = doc(firestore, `users/${user.uid}/clients`, id);
+        await deleteDoc(clientRef);
       }
-      
-      await deleteDoc(clientRef);
       
       // Update local state
       const { clients } = get();
@@ -592,51 +415,44 @@ export const useClientStore = create<ClientState>((set, get) => ({
     if (!user) throw new Error('User not authenticated');
     
     try {
-      // Helper function to check if user can access shared data
-      const canAccessSharedData = () => {
+      // Helper function to check if user is admin
+      const isAdmin = async () => {
         const currentUser = authService.getCurrentUser();
-        const role = currentUser?.customClaims?.role;
-        return role === 'admin' || role === 'manager';
+        return currentUser?.customClaims?.role === 'admin';
       };
 
-      let transactionsRef;
-      let newTransaction;
+      const newTransaction = {
+        ...transaction,
+        dueDate: toFirestoreTimestamp(transaction.dueDate),
+        paymentDate: transaction.paymentDate ? toFirestoreTimestamp(transaction.paymentDate) : null,
+        createdAt: Timestamp.now()
+      };
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Save to shared transactions collection
-        transactionsRef = collection(firestore, 'transactions');
-        newTransaction = {
-          ...transaction,
-          dueDate: toFirestoreTimestamp(transaction.dueDate),
-          paymentDate: transaction.paymentDate ? toFirestoreTimestamp(transaction.paymentDate) : null,
-          createdAt: Timestamp.now(),
-          createdBy: user.uid
-        };
-      } else {
-        // Employee: Save to their own transactions subcollection
-        transactionsRef = collection(firestore, `users/${user.uid}/transactions`);
-        newTransaction = {
-          ...transaction,
-          dueDate: toFirestoreTimestamp(transaction.dueDate),
-          paymentDate: transaction.paymentDate ? toFirestoreTimestamp(transaction.paymentDate) : null,
-          createdAt: Timestamp.now()
-        };
+      // Always add to user's subcollection
+      const userTransactionsCol = collection(firestore, `users/${user.uid}/transactions`);
+      const userDocRef = await addDoc(userTransactionsCol, newTransaction);
+      
+      // If admin, also add to shared collection
+      if (await isAdmin()) {
+        const sharedTransactionsCol = collection(firestore, 'transactions');
+        await addDoc(sharedTransactionsCol, {
+          ...newTransaction,
+          createdBy: user.uid,
+          originalId: userDocRef.id
+        });
       }
       
-      const docRef = await addDoc(transactionsRef, newTransaction);
-      
-      // Update local state with Date objects
+      // Update local state
       const { transactions } = get();
       set({ 
         transactions: [{ 
-          id: docRef.id, 
+          id: userDocRef.id, 
           ...transaction,
-          createdAt: new Date(),
-          createdBy: canAccessSharedData() ? user.uid : undefined
-        } as Transaction, ...transactions] 
+          createdAt: new Date()
+        } as LegacyTransaction, ...transactions] 
       });
       
-      return docRef.id;
+      return userDocRef.id;
     } catch (error) {
       console.error('Error adding transaction:', error);
       set({ error: (error as Error).message });
@@ -649,41 +465,36 @@ export const useClientStore = create<ClientState>((set, get) => ({
     if (!user) throw new Error('User not authenticated');
     
     try {
-      // Helper function to check if user can access shared data
-      const canAccessSharedData = () => {
+      // Helper function to check if user is admin
+      const isAdmin = async () => {
         const currentUser = authService.getCurrentUser();
-        const role = currentUser?.customClaims?.role;
-        return role === 'admin' || role === 'manager';
+        return currentUser?.customClaims?.role === 'admin';
       };
 
-      let transactionRef;
-      let updateData;
+      const updateData = { ...data };
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Update in shared transactions collection
-        transactionRef = doc(firestore, 'transactions', id);
-        updateData = { 
-          ...data,
-          updatedBy: user.uid,
-          updatedAt: Timestamp.now()
-        };
-      } else {
-        // Employee: Update in their own transactions subcollection
-        transactionRef = doc(firestore, `users/${user.uid}/transactions`, id);
-        updateData = { ...data };
-      }
-      
+      // Convert dates to Firestore Timestamps
       if (updateData.dueDate instanceof Date) {
         updateData.dueDate = Timestamp.fromDate(updateData.dueDate);
       }
       if (updateData.paymentDate instanceof Date) {
         updateData.paymentDate = Timestamp.fromDate(updateData.paymentDate);
       }
-      if (updateData.createdAt instanceof Date) {
-        updateData.createdAt = Timestamp.fromDate(updateData.createdAt);
-      }
       
-      await updateDoc(transactionRef, updateData);
+      updateData.updatedAt = Timestamp.now();
+      
+      // Check if transaction exists in shared collection
+      const sharedTransactionRef = doc(firestore, 'transactions', id);
+      const sharedTransactionDoc = await getDoc(sharedTransactionRef);
+      
+      // Update in user's subcollection
+      const userTransactionRef = doc(firestore, `users/${user.uid}/transactions`, id);
+      await updateDoc(userTransactionRef, updateData);
+      
+      // If admin and transaction exists in shared collection, update it there too
+      if (sharedTransactionDoc.exists() && await isAdmin()) {
+        await updateDoc(sharedTransactionRef, updateData);
+      }
       
       // Update local state
       const { transactions } = get();
@@ -704,24 +515,24 @@ export const useClientStore = create<ClientState>((set, get) => ({
     if (!user) throw new Error('User not authenticated');
     
     try {
-      // Helper function to check if user can access shared data
-      const canAccessSharedData = () => {
+      // Helper function to check if user is admin
+      const isAdmin = async () => {
         const currentUser = authService.getCurrentUser();
-        const role = currentUser?.customClaims?.role;
-        return role === 'admin' || role === 'manager';
+        return currentUser?.customClaims?.role === 'admin';
       };
 
-      let transactionRef;
+      // Check if transaction exists in shared collection
+      const sharedTransactionRef = doc(firestore, 'transactions', id);
+      const sharedTransactionDoc = await getDoc(sharedTransactionRef);
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Delete from shared transactions collection
-        transactionRef = doc(firestore, 'transactions', id);
-      } else {
-        // Employee: Delete from their own transactions subcollection
-        transactionRef = doc(firestore, `users/${user.uid}/transactions`, id);
+      // Delete from user's subcollection
+      const userTransactionRef = doc(firestore, `users/${user.uid}/transactions`, id);
+      await deleteDoc(userTransactionRef);
+      
+      // If admin and transaction exists in shared collection, delete it there too
+      if (sharedTransactionDoc.exists() && await isAdmin()) {
+        await deleteDoc(sharedTransactionRef);
       }
-      
-      await deleteDoc(transactionRef);
       
       // Update local state
       const { transactions } = get();
@@ -747,22 +558,12 @@ export const useClientStore = create<ClientState>((set, get) => ({
         return role === 'admin' || role === 'manager';
       };
 
-      let transactionsRef;
-      let q;
+      // Get user-specific transactions
+      const userTransactionsCol = collection(firestore, `users/${user.uid}/transactions`);
+      const userQuery = query(userTransactionsCol, orderBy('createdAt', 'desc'));
+      const userSnapshot = await getDocs(userQuery);
       
-      if (canAccessSharedData()) {
-        // Admin and Manager: Access shared transactions collection
-        transactionsRef = collection(firestore, 'transactions');
-        q = query(transactionsRef, orderBy('createdAt', 'desc'));
-      } else {
-        // Employee: Access only their own transactions
-        transactionsRef = collection(firestore, `users/${user.uid}/transactions`);
-        q = query(transactionsRef, orderBy('createdAt', 'desc'));
-      }
-      
-      const snapshot = await getDocs(q);
-      
-      const transactions = snapshot.docs.map(doc => {
+      let transactions = userSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -772,6 +573,34 @@ export const useClientStore = create<ClientState>((set, get) => ({
           createdAt: safeToDate(data.createdAt)
         };
       }) as LegacyTransaction[];
+      
+      // If admin or manager, also get shared transactions
+      if (canAccessSharedData()) {
+        const sharedTransactionsCol = collection(firestore, 'transactions');
+        const sharedQuery = query(sharedTransactionsCol, orderBy('createdAt', 'desc'));
+        const sharedSnapshot = await getDocs(sharedQuery);
+        
+        const sharedTransactions = sharedSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            dueDate: safeToDate(data.dueDate),
+            paymentDate: data.paymentDate ? safeToDate(data.paymentDate) : undefined,
+            createdAt: safeToDate(data.createdAt),
+            isShared: true
+          };
+        }) as LegacyTransaction[];
+        
+        // Merge transactions, avoiding duplicates
+        const transactionIds = new Set(transactions.map(t => t.id));
+        for (const transaction of sharedTransactions) {
+          if (!transactionIds.has(transaction.id)) {
+            transactions.push(transaction);
+            transactionIds.add(transaction.id);
+          }
+        }
+      }
       
       // Update local state with fetched transactions
       set({ transactions });

@@ -3,8 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Client } from '../../stores/clientStore';
 import { firestoreService, Service } from '../../services/firestoreService';
 import { useAuthStore } from '../../stores/authStore';
-import { X, CreditCard, User, Scissors, DollarSign, Calendar, CheckCircle, Clock, Zap } from 'lucide-react';
-
+import { X, CreditCard, User, Scissors, DollarSign, Calendar, CheckCircle, Clock } from 'lucide-react';
 
 interface TransactionFormData {
   clientId: string;
@@ -64,17 +63,19 @@ const TransactionFormCompact: React.FC<TransactionFormCompactProps> = ({
       }
 
       try {
+        setLoading(true);
         console.log('TransactionFormCompact: Fetching services for user:', user.uid);
         
-        // Load services from user's specific collection: users/{userId}/services
+        // Load services from both shared collection and user's specific collection
         const loadedServices = await firestoreService.loadServicesSettings(user.uid);
         console.log('TransactionFormCompact: loadServicesSettings returned', loadedServices.length, 'services');
-        console.log('TransactionFormCompact: Services data:', loadedServices);
         
         setServices(loadedServices);
       } catch (error) {
         console.error('Failed to load services:', error);
         setServices([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchServices();
@@ -83,7 +84,7 @@ const TransactionFormCompact: React.FC<TransactionFormCompactProps> = ({
   // Auto-fill amount when service is selected
   useEffect(() => {
     if (selectedService) {
-      const service = services.find(s => s.name === selectedService);
+      const service = services.find(s => s.id === selectedService);
       if (service && service.price && service.price > 0) {
         setValue('amount', service.price);
       }
@@ -164,7 +165,6 @@ const TransactionFormCompact: React.FC<TransactionFormCompactProps> = ({
         </div>
 
         <div className="p-6">
-
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
             {/* Client Selection */}
             <div className="space-y-2">
@@ -212,8 +212,9 @@ const TransactionFormCompact: React.FC<TransactionFormCompactProps> = ({
               >
                 <option value="">Select a service</option>
                 {services.map((service) => (
-                  <option key={service.id} value={service.name}>
-                    {service.name} {service.price ? `- INR ${service.price}` : ''}
+                  <option key={service.id} value={service.id}>
+                    {service.name} - ₹{service.price}
+                    {service.isShared && " (Shared)"}
                   </option>
                 ))}
               </select>
@@ -305,25 +306,6 @@ const TransactionFormCompact: React.FC<TransactionFormCompactProps> = ({
                 {errors.dueDate && (
                   <p className="mt-1 text-xs text-red-600">{errors.dueDate.message}</p>
                 )}
-              </div>
-            )}
-
-            {/* PayNow Section - Show when Pay Now mode is enabled */}
-            {shouldShowPayNowButton() && (
-              <div className="border-t pt-4 space-y-3">
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <h3 className="text-sm font-medium text-green-800 mb-3">Payment Gateway</h3>
-                  <PayNowButton
-                    amount={amount}
-                    clientId={clientId}
-                    clientName={getSelectedClient()?.name || 'Unknown Client'}
-                    service={selectedService}
-                    onPaymentSuccess={handlePaymentSuccess}
-                    onPaymentError={handlePaymentError}
-                    disabled={paymentProcessing}
-                    className="w-full"
-                  />
-                </div>
               </div>
             )}
 

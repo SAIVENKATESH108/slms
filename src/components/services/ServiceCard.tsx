@@ -1,6 +1,6 @@
 import React from 'react';
 import { Edit, Trash2, DollarSign, Clock, Tag } from 'lucide-react';
-import { Service } from '../../services/serviceManagementService';
+import { Service } from '../../services/firestoreService';
 
 interface ServiceCardProps {
   service: Service;
@@ -12,7 +12,7 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ service, canManage, onEdit, onDelete }) => {
   // Format currency
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-PK', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 0,
@@ -28,6 +28,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, canManage, onEdit, o
           <span className="inline-block px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
             {service.category}
           </span>
+          {service.isShared && (
+            <span className="inline-block ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+              Shared
+            </span>
+          )}
         </div>
         
         {canManage && (
@@ -64,7 +69,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, canManage, onEdit, o
             <Clock className="w-4 h-4 mr-1" />
             <span>Duration</span>
           </div>
-          <span className="text-sm text-gray-700">{service.duration} min</span>
+          <span className="text-sm text-gray-700">{service.duration || 30} min</span>
         </div>
         
         <div className="flex items-center justify-between">
@@ -73,11 +78,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, canManage, onEdit, o
             <span>Status</span>
           </div>
           <span className={`text-xs px-2 py-1 rounded-full ${
-            service.isActive 
+            service.isActive !== false
               ? 'bg-green-100 text-green-800' 
               : 'bg-red-100 text-red-800'
           }`}>
-            {service.isActive ? 'Active' : 'Inactive'}
+            {service.isActive !== false ? 'Active' : 'Inactive'}
           </span>
         </div>
       </div>

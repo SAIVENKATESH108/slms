@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useUserStore } from '../../stores/userStore';
+import { useAuthSession } from '../../hooks/AuthSession';
 
 interface ProtectedRouteProps {
   allowedRoles: string[];
@@ -13,15 +13,24 @@ interface ProtectedRouteProps {
  * otherwise redirects to a fallback path (default: /403).
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, redirectPath = '/403' }) => {
-  const role = useUserStore((state) => state.role);
+  const { role, isAuthenticated, loading } = useAuthSession();
 
-  if (!role) {
-    // Role not loaded yet or user not authenticated, redirect to login or fallback
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(role)) {
-    // User role not authorized for this route
+  // Redirect if role not loaded or not authorized
+  if (!role || !allowedRoles.includes(role)) {
     return <Navigate to={redirectPath} replace />;
   }
 

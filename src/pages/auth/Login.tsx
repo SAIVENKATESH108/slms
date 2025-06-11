@@ -1,124 +1,9 @@
-// import React, { useState } from 'react';
-// import { Link } from 'react-router-dom';
-// import { signInWithEmailAndPassword } from 'firebase/auth';
-// import { auth } from '../../firebase/config';
-// import { Scissors } from 'lucide-react';
-
-// const Login = () => {
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [error, setError] = useState<string | null>(null);
-//   const [loading, setLoading] = useState(false);
-  
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setError(null);
-//     setLoading(true);
-    
-//     try {
-//       await signInWithEmailAndPassword(auth, email, password);
-//       // Redirect handled by App.tsx with protected routes
-//     } catch (err: any) {
-//       setError(err.message || 'Failed to sign in');
-//       setLoading(false);
-//     }
-//   };
-  
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-//       <div className="max-w-md w-full space-y-8">
-//         <div className="text-center">
-//           <div className="flex justify-center">
-//             <Scissors className="h-12 w-12 text-purple-600" />
-//           </div>
-//           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-//             BeautiFlow
-//           </h2>
-//           <p className="mt-2 text-center text-sm text-gray-600">
-//             Sign in to your account
-//           </p>
-//         </div>
-        
-//         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-//           {error && (
-//             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-//               {error}
-//             </div>
-//           )}
-          
-//           <div className="rounded-md -space-y-px">
-//             <div className="mb-4">
-//               <label htmlFor="email-address" className="sr-only">Email address</label>
-//               <input
-//                 id="email-address"
-//                 name="email"
-//                 type="email"
-//                 autoComplete="email"
-//                 required
-//                 value={email}
-//                 onChange={(e) => setEmail(e.target.value)}
-//                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-//                 placeholder="Email address"
-//               />
-//             </div>
-//             <div>
-//               <label htmlFor="password" className="sr-only">Password</label>
-//               <input
-//                 id="password"
-//                 name="password"
-//                 type="password"
-//                 autoComplete="current-password"
-//                 required
-//                 value={password}
-//                 onChange={(e) => setPassword(e.target.value)}
-//                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-//                 placeholder="Password"
-//               />
-//             </div>
-//           </div>
-          
-//           <div className="flex items-center justify-between">
-//             <div className="text-sm">
-//               <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
-//                 Forgot your password?
-//               </a>
-//             </div>
-//           </div>
-          
-//           <div>
-//             <button
-//               type="submit"
-//               disabled={loading}
-//               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-//             >
-//               {loading ? 'Signing in...' : 'Sign in'}
-//             </button>
-//           </div>
-          
-//           <div className="text-center text-sm">
-//             <p className="text-gray-600">
-//               Don't have an account?{' '}
-//               <Link to="/register" className="font-medium text-purple-600 hover:text-purple-500">
-//                 Sign up
-//               </Link>
-//             </p>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Login;
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuthSession } from '../../hooks/AuthSession';
+import { useNavigate } from 'react-router-dom';
 
-interface LoginFormProps {
-  onSuccess?: () => void;
-}
-
-const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
@@ -127,6 +12,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   });
 
   const { signIn, loading, error, clearError } = useAuthSession();
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -139,7 +25,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     
     try {
       await signIn(formData.email, formData.password, rememberMe);
-      onSuccess?.();
+      navigate('/dashboard');
     } catch (error) {
       // Error is handled by the hook
     }
@@ -153,7 +39,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             Sign in to BeautiFlow
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Employee access portal
+            Beauty Management System
           </p>
         </div>
 
@@ -262,4 +148,4 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   );
 };
 
-export default LoginForm;
+export default Login;
