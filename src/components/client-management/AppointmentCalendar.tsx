@@ -16,23 +16,33 @@ import {
   Eye,
   Edit,
   Trash2,
-  Bell
+  Bell,
+  Scissors
 } from 'lucide-react';
 import { Appointment, CalendarEvent } from '../../types/ClientManagement';
 import { useClientStore } from '../../stores/clientStore';
+import { format, addDays, startOfWeek, addWeeks, isSameDay, parseISO, isToday, isTomorrow, isThisWeek, isThisMonth } from 'date-fns';
+import { firestoreService, Service } from '../../services/firestoreService';
+import { useAuthStore } from '../../stores/authStore';
+import { collection, getDocs, query, where, Timestamp, orderBy, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { firestore } from '../../firebase/config';
 
 type ViewType = 'month' | 'week' | 'day' | 'agenda';
 
 const AppointmentCalendar: React.FC = () => {
   const { clients } = useClientStore();
+  const { user } = useAuthStore();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewType, setViewType] = useState<ViewType>('month');
+  const [viewType, setViewType] = useState<ViewType>('week');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [filters, setFilters] = useState({
     status: 'all',
@@ -41,69 +51,87 @@ const AppointmentCalendar: React.FC = () => {
     timeRange: 'all'
   });
 
-  // Mock appointment data - replace with actual API calls
+  // Fetch appointments
   useEffect(() => {
-    const mockAppointments: Appointment[] = [
-      {
-        id: '1',
-        clientId: 'client1',
-        serviceId: 'service1',
-        staffId: 'staff1',
-        date: new Date('2024-01-20'),
-        startTime: '10:00',
-        endTime: '11:00',
-        status: 'confirmed',
-        notes: 'Regular customer, prefers specific stylist',
-        reminderSent: true,
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-15')
-      },
-      {
-        id: '2',
-        clientId: 'client2',
-        serviceId: 'service2',
-        date: new Date('2024-01-20'),
-        startTime: '14:30',
-        endTime: '16:00',
-        status: 'scheduled',
-        notes: 'First time customer',
-        reminderSent: false,
-        createdAt: new Date('2024-01-18'),
-        updatedAt: new Date('2024-01-18')
-      },
-      {
-        id: '3',
-        clientId: 'client3',
-        serviceId: 'service3',
-        date: new Date('2024-01-21'),
-        startTime: '11:00',
-        endTime: '12:15',
-        status: 'completed',
-        notes: 'Satisfied with service',
-        reminderSent: true,
-        createdAt: new Date('2024-01-19'),
-        updatedAt: new Date('2024-01-21')
-      },
-      {
-        id: '4',
-        clientId: 'client4',
-        serviceId: 'service4',
-        date: new Date('2024-01-22'),
-        startTime: '09:00',
-        endTime: '11:00',
-        status: 'cancelled',
-        notes: 'Client cancelled due to emergency',
-        reminderSent: true,
-        createdAt: new Date('2024-01-20'),
-        updatedAt: new Date('2024-01-22')
+    const fetchAppointments = async () => {
+      if (!user?.uid) return;
+      
+      try {
+        setLoading(true);
+        
+        // Get start and end dates for query
+        let startDate = new Date();
+        let endDate = new Date();
+        
+        if (viewType === 'month') {
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+          endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        } else if (viewType === 'week') {
+          startDate = startOfWeek(currentDate);
+          endDate = addDays(startDate, 6);
+        } else if (viewType === 'day') {
+          startDate = currentDate;
+          endDate = currentDate;
+        } else {
+          // For agenda view, get appointments for the next 30 days
+          startDate = new Date();
+          endDate = addDays(startDate, 30);
+        }
+        
+        // Get appointments from Firestore
+        const appointmentsRef = collection(firestore, `users/${user.uid}/appointments`);
+        const q = query(
+          appointmentsRef,
+          where('date', '>=', Timestamp.fromDate(startDate)),
+          where('date', '<=', Timestamp.fromDate(endDate)),
+          orderBy('date', 'asc')
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        const fetchedAppointments = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            clientId: data.clientId,
+            serviceId: data.serviceId,
+            staffId: data.staffId,
+            date: data.date.toDate(),
+            startTime: data.startTime,
+            endTime: data.endTime,
+            status: data.status,
+            notes: data.notes,
+            reminderSent: data.reminderSent,
+            createdAt: data.createdAt.toDate(),
+            updatedAt: data.updatedAt.toDate()
+          };
+        });
+        
+        setAppointments(fetchedAppointments);
+        
+        // Fetch services
+        const loadedServices = await firestoreService.loadServicesSettings(user.uid);
+        setServices(loadedServices);
+        
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+        setError('Failed to load appointments');
+      } finally {
+        setLoading(false);
       }
-    ];
-    setAppointments(mockAppointments);
-  }, []);
+    };
+    
+    fetchAppointments();
+  }, [user?.uid, currentDate, viewType]);
 
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
     return client?.name || 'Unknown Client';
+  };
+  
+  const getServiceName = (serviceId: string) => {
+    const service = services.find(s => s.id === serviceId);
+    return service?.name || 'Unknown Service';
   };
 
   const getStatusColor = (status: string) => {
@@ -133,18 +161,31 @@ const AppointmentCalendar: React.FC = () => {
   const filteredAppointments = useMemo(() => {
     return appointments.filter(appointment => {
       const clientName = getClientName(appointment.clientId);
+      const serviceName = getServiceName(appointment.serviceId);
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch = !searchQuery || 
         clientName.toLowerCase().includes(searchLower) ||
+        serviceName.toLowerCase().includes(searchLower) ||
         appointment.notes?.toLowerCase().includes(searchLower);
 
       const matchesStatus = filters.status === 'all' || appointment.status === filters.status;
       const matchesService = filters.service === 'all' || appointment.serviceId === filters.service;
       const matchesStaff = filters.staff === 'all' || appointment.staffId === filters.staff;
+      
+      let matchesTimeRange = true;
+      if (filters.timeRange === 'today') {
+        matchesTimeRange = isToday(appointment.date);
+      } else if (filters.timeRange === 'tomorrow') {
+        matchesTimeRange = isTomorrow(appointment.date);
+      } else if (filters.timeRange === 'week') {
+        matchesTimeRange = isThisWeek(appointment.date);
+      } else if (filters.timeRange === 'month') {
+        matchesTimeRange = isThisMonth(appointment.date);
+      }
 
-      return matchesSearch && matchesStatus && matchesService && matchesStaff;
+      return matchesSearch && matchesStatus && matchesService && matchesStaff && matchesTimeRange;
     });
-  }, [appointments, searchQuery, filters, clients]);
+  }, [appointments, searchQuery, filters, clients, services]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -171,8 +212,7 @@ const AppointmentCalendar: React.FC = () => {
 
   const getAppointmentsForDate = (date: Date) => {
     return filteredAppointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.date);
-      return appointmentDate.toDateString() === date.toDateString();
+      return isSameDay(appointment.date, date);
     });
   };
 
@@ -225,6 +265,57 @@ const AppointmentCalendar: React.FC = () => {
       weekDays.push(day);
     }
     return weekDays;
+  };
+  
+  // Delete appointment
+  const handleDeleteAppointment = async (appointmentId: string) => {
+    if (!user?.uid) return;
+    
+    if (window.confirm('Are you sure you want to delete this appointment?')) {
+      try {
+        const appointmentRef = doc(firestore, `users/${user.uid}/appointments`, appointmentId);
+        await deleteDoc(appointmentRef);
+        
+        // Update local state
+        setAppointments(prev => prev.filter(a => a.id !== appointmentId));
+        
+        // Close modal if open
+        if (selectedAppointment?.id === appointmentId) {
+          setSelectedAppointment(null);
+        }
+      } catch (error) {
+        console.error('Error deleting appointment:', error);
+        setError('Failed to delete appointment');
+      }
+    }
+  };
+  
+  // Update appointment status
+  const handleUpdateStatus = async (appointmentId: string, newStatus: string) => {
+    if (!user?.uid) return;
+    
+    try {
+      const appointmentRef = doc(firestore, `users/${user.uid}/appointments`, appointmentId);
+      await updateDoc(appointmentRef, {
+        status: newStatus,
+        updatedAt: Timestamp.now()
+      });
+      
+      // Update local state
+      setAppointments(prev => prev.map(a => 
+        a.id === appointmentId 
+          ? { ...a, status: newStatus as any, updatedAt: new Date() } 
+          : a
+      ));
+      
+      // Update selected appointment if open
+      if (selectedAppointment?.id === appointmentId) {
+        setSelectedAppointment(prev => prev ? { ...prev, status: newStatus as any } : null);
+      }
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      setError('Failed to update appointment status');
+    }
   };
 
   const renderMonthView = () => {
@@ -293,7 +384,7 @@ const AppointmentCalendar: React.FC = () => {
 
   const renderWeekView = () => {
     const weekDays = getWeekDays(currentDate);
-    const hours = Array.from({ length: 24 }, (_, i) => i);
+    const hours = Array.from({ length: 12 }, (_, i) => i + 8); // 8 AM to 7 PM
 
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -303,7 +394,7 @@ const AppointmentCalendar: React.FC = () => {
           </div>
           {weekDays.map(day => (
             <div key={day.toISOString()} className="bg-gray-50 p-2 text-center text-sm font-medium text-gray-700">
-              <div>{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+              <div>{format(day, 'EEE')}</div>
               <div className={`text-lg ${
                 day.toDateString() === new Date().toDateString() 
                   ? 'text-blue-600 font-bold' 
@@ -314,7 +405,7 @@ const AppointmentCalendar: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-[600px] overflow-y-auto">
           {hours.map(hour => (
             <div key={hour} className="grid grid-cols-8 gap-px bg-gray-200 border-t border-gray-200">
               <div className="bg-white p-2 text-xs text-gray-500 text-center">
@@ -327,7 +418,7 @@ const AppointmentCalendar: React.FC = () => {
                 });
                 
                 return (
-                  <div key={`${day.toISOString()}-${hour}`} className="bg-white p-1 min-h-[60px]">
+                  <div key={`${day.toISOString()}-${hour}`} className="bg-white p-1 min-h-[60px] relative">
                     {dayAppointments.map(appointment => (
                       <div
                         key={appointment.id}
@@ -354,49 +445,82 @@ const AppointmentCalendar: React.FC = () => {
 
   const renderAgendaView = () => {
     const sortedAppointments = [...filteredAppointments].sort((a, b) => {
-      const dateA = new Date(`${a.date.toDateString()} ${a.startTime}`);
-      const dateB = new Date(`${b.date.toDateString()} ${b.startTime}`);
-      return dateA.getTime() - dateB.getTime();
+      // Sort by date first
+      const dateComparison = a.date.getTime() - b.date.getTime();
+      if (dateComparison !== 0) return dateComparison;
+      
+      // If same date, sort by time
+      const aTime = a.startTime.split(':').map(Number);
+      const bTime = b.startTime.split(':').map(Number);
+      
+      const aMinutes = aTime[0] * 60 + aTime[1];
+      const bMinutes = bTime[0] * 60 + bTime[1];
+      
+      return aMinutes - bMinutes;
+    });
+    
+    // Group appointments by date
+    const groupedAppointments: { [key: string]: Appointment[] } = {};
+    
+    sortedAppointments.forEach(appointment => {
+      const dateKey = format(appointment.date, 'yyyy-MM-dd');
+      if (!groupedAppointments[dateKey]) {
+        groupedAppointments[dateKey] = [];
+      }
+      groupedAppointments[dateKey].push(appointment);
     });
 
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="divide-y divide-gray-200">
-          {sortedAppointments.map(appointment => (
-            <div key={appointment.id} className="p-4 hover:bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className={`p-2 rounded-full ${getStatusColor(appointment.status)}`}>
-                      {getStatusIcon(appointment.status)}
+          {Object.entries(groupedAppointments).map(([dateKey, appointments]) => (
+            <div key={dateKey} className="p-4">
+              <div className="flex items-center mb-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Calendar className="h-5 w-5 text-purple-600" />
+                </div>
+                <h3 className="ml-3 text-lg font-semibold text-gray-900">
+                  {format(new Date(dateKey), 'EEEE, MMMM d, yyyy')}
+                </h3>
+              </div>
+              
+              <div className="space-y-3 ml-12">
+                {appointments.map(appointment => (
+                  <div 
+                    key={appointment.id} 
+                    className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+                    onClick={() => setSelectedAppointment(appointment)}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className={`p-2 rounded-full ${getStatusColor(appointment.status)}`}>
+                        {getStatusIcon(appointment.status)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{getClientName(appointment.clientId)}</p>
+                        <p className="text-sm text-gray-500">{getServiceName(appointment.serviceId)}</p>
+                        <p className="text-xs text-gray-500">
+                          {appointment.startTime} - {appointment.endTime}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                        {appointment.status}
+                      </span>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900">
-                      {getClientName(appointment.clientId)}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {appointment.date.toLocaleDateString()} • {appointment.startTime} - {appointment.endTime}
-                    </p>
-                    {appointment.notes && (
-                      <p className="text-sm text-gray-600 mt-1">{appointment.notes}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
-                    {appointment.status}
-                  </span>
-                  <button
-                    onClick={() => setSelectedAppointment(appointment)}
-                    className="text-gray-400 hover:text-blue-600"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </button>
-                </div>
+                ))}
               </div>
             </div>
           ))}
+          
+          {Object.keys(groupedAppointments).length === 0 && (
+            <div className="p-12 text-center">
+              <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900">No appointments found</h3>
+              <p className="text-gray-500 mt-1">Try adjusting your filters or add a new appointment</p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -407,7 +531,7 @@ const AppointmentCalendar: React.FC = () => {
       case 'month': return renderMonthView();
       case 'week': return renderWeekView();
       case 'agenda': return renderAgendaView();
-      default: return renderMonthView();
+      default: return renderWeekView();
     }
   };
 
@@ -491,13 +615,13 @@ const AppointmentCalendar: React.FC = () => {
             <Filter className="h-4 w-4 mr-2" />
             Filters
           </button>
-          <button
-            onClick={() => setShowAddForm(true)}
+          <a
+            href="/appointment"
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4 mr-2" />
             Book Appointment
-          </button>
+          </a>
         </div>
       </div>
 
@@ -560,22 +684,23 @@ const AppointmentCalendar: React.FC = () => {
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Services</option>
-                <option value="service1">Hair Styling</option>
-                <option value="service2">Facial Treatment</option>
-                <option value="service3">Manicure</option>
+                {services.map(service => (
+                  <option key={service.id} value={service.id}>{service.name}</option>
+                ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Staff</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Time Range</label>
               <select
-                value={filters.staff}
-                onChange={(e) => setFilters(prev => ({ ...prev, staff: e.target.value }))}
+                value={filters.timeRange}
+                onChange={(e) => setFilters(prev => ({ ...prev, timeRange: e.target.value }))}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="all">All Staff</option>
-                <option value="staff1">Sarah Johnson</option>
-                <option value="staff2">Mike Chen</option>
-                <option value="staff3">Emma Wilson</option>
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="tomorrow">Tomorrow</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
               </select>
             </div>
             <div className="flex items-end">
@@ -606,9 +731,9 @@ const AppointmentCalendar: React.FC = () => {
               <ChevronLeft className="h-4 w-4" />
             </button>
             <h3 className="text-lg font-semibold text-gray-900">
-              {viewType === 'month' && currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              {viewType === 'week' && `Week of ${currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
-              {viewType === 'day' && currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              {viewType === 'month' && format(currentDate, 'MMMM yyyy')}
+              {viewType === 'week' && `Week of ${format(getWeekDays(currentDate)[0], 'MMM d, yyyy')}`}
+              {viewType === 'day' && format(currentDate, 'EEEE, MMMM d, yyyy')}
             </h3>
             <button
               onClick={() => getNavigationHandler()('next')}
@@ -627,10 +752,23 @@ const AppointmentCalendar: React.FC = () => {
       )}
 
       {/* Calendar View */}
-      {renderCalendarView()}
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <p className="flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            {error}
+          </p>
+        </div>
+      ) : (
+        renderCalendarView()
+      )}
 
       {/* Empty State */}
-      {filteredAppointments.length === 0 && (
+      {filteredAppointments.length === 0 && !loading && !error && (
         <div className="text-center py-12">
           <Calendar className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No appointments found</h3>
@@ -642,15 +780,149 @@ const AppointmentCalendar: React.FC = () => {
           </p>
           {!searchQuery && (
             <div className="mt-6">
-              <button
-                onClick={() => setShowAddForm(true)}
+              <a
+                href="/appointment"
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Book Appointment
-              </button>
+              </a>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Appointment Detail Modal */}
+      {selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Appointment Details</h3>
+                <button
+                  onClick={() => setSelectedAppointment(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <User className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">Client</span>
+                  </div>
+                  <span className="font-medium">{getClientName(selectedAppointment.clientId)}</span>
+                </div>
+                
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <Scissors className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">Service</span>
+                  </div>
+                  <span className="font-medium">{getServiceName(selectedAppointment.serviceId)}</span>
+                </div>
+                
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <Calendar className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">Date</span>
+                  </div>
+                  <span className="font-medium">{format(selectedAppointment.date, 'EEEE, MMMM d, yyyy')}</span>
+                </div>
+                
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <Clock className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">Time</span>
+                  </div>
+                  <span className="font-medium">{selectedAppointment.startTime} - {selectedAppointment.endTime}</span>
+                </div>
+                
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <Bell className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">Reminder</span>
+                  </div>
+                  <span className="font-medium">{selectedAppointment.reminderSent ? 'Sent' : 'Not Sent'}</span>
+                </div>
+                
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">Status</span>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedAppointment.status)}`}>
+                    {selectedAppointment.status}
+                  </span>
+                </div>
+                
+                {selectedAppointment.notes && (
+                  <div className="pb-3 border-b border-gray-200">
+                    <div className="flex items-center mb-2">
+                      <MessageSquare className="h-5 w-5 text-gray-400 mr-2" />
+                      <span className="text-gray-600">Notes</span>
+                    </div>
+                    <p className="text-gray-700 text-sm">{selectedAppointment.notes}</p>
+                  </div>
+                )}
+                
+                {/* Status Update Buttons */}
+                <div className="pt-2">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Update Status</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleUpdateStatus(selectedAppointment.id, 'confirmed')}
+                      className="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200"
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(selectedAppointment.id, 'in-progress')}
+                      className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-md text-sm hover:bg-yellow-200"
+                    >
+                      In Progress
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(selectedAppointment.id, 'completed')}
+                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-md text-sm hover:bg-blue-200"
+                    >
+                      Complete
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(selectedAppointment.id, 'cancelled')}
+                      className="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm hover:bg-red-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(selectedAppointment.id, 'no-show')}
+                      className="px-3 py-1 bg-orange-100 text-orange-800 rounded-md text-sm hover:bg-orange-200"
+                    >
+                      No Show
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => handleDeleteAppointment(selectedAppointment.id)}
+                    className="px-3 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setSelectedAppointment(null)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
