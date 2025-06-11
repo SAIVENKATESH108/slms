@@ -15,6 +15,7 @@ import FlatView from './pages/FlatView';
 import ClientDetail from './pages/ClientDetail';
 import ClientManagement from './pages/ClientManagement';
 import ClientAppointment from './pages/ClientAppointment';
+import ClientLogin from './pages/ClientLogin';
 import Finances from './pages/Finances';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -57,10 +58,6 @@ function App() {
 
   if (loading) {
     return <Loader />;
-  }
-
-  if (!isAuthenticated) {
-    return <Login />;
   }
 
   const router = createBrowserRouter([
@@ -128,7 +125,7 @@ function App() {
         },
         {
           path: 'appointment',
-          element: <AuthGuard requireAuth={true}><ClientAppointment /></AuthGuard>,
+          element: <ClientAppointment />,
         },
         {
           path: 'flats',
@@ -168,6 +165,10 @@ function App() {
     {
       path: '/login',
       element: !user ? <Login /> : <Navigate to="/" />,
+    },
+    {
+      path: '/client-login',
+      element: <ClientLogin />,
     },
     {
       path: '/register',
